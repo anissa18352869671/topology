@@ -1,0 +1,1379 @@
+<!DOCTYPE html>
+<html>
+
+	<head>
+		<meta charset="UTF-8">
+		<title></title>
+		<link rel="stylesheet" type="text/css" href="css/index-new.css" />
+		<link rel="stylesheet" type="text/css" href="layui/css/layui.css" />
+	</head>
+
+	<body>
+		<div id="loucengbox">
+			<img class="legnd" src="img/tb_legnd.png" />
+			<div class="type">
+
+			</div>
+			<div class="btn">
+				<div class="level safe">
+
+				</div>
+			</div>
+			<div class="bg">
+				<canvas width="1453" height="740" id="loucengcanvas"></canvas>
+				<svg width="1453" height="740" id="svg" xmlns="http://www.w3.org/2000/svg">
+				</svg>
+
+				<div class="tb_pop_opert">
+				</div>
+				<div class="tb_pop_opert1">
+				</div>
+				<div class="prompt">
+					<div class="prompt-title">
+						资产详情
+						<span class="prompt-close">×</span>
+					</div>
+					<div class="prompt-tab">
+					</div>
+					<div class="prompt-container">
+						<div class="contItem current">
+							<div class="detail-title">
+								基本信息
+							</div>
+							<table class="detail-table" cellspacing="0">
+								<tr>
+									<th>资产类型：</th>
+									<td>主机</td>
+								</tr>
+								<tr>
+									<th> 资产名称：</th>
+									<td>国瑞信安</td>
+								</tr>
+								<tr>
+									<th> 主IP：</th>
+									<td>172.16.18.223</td>
+								</tr>
+								<tr>
+									<th> 资产编号：</th>
+									<td>172.16.18.223</td>
+								</tr>
+								<tr>
+									<th>操作系统：</th>
+									<td>windows</td>
+								</tr>
+								<tr>
+									<th> 资产责任人：</th>
+									<td>一些文本</td>
+								</tr>
+								<tr>
+									<th> 运维工程师：</th>
+									<td>一些文本</td>
+								</tr>
+								<tr>
+									<th> 资产价值 ：</th>
+									<td>一些文本</td>
+								</tr>
+								<tr>
+									<th> 是否核心资产 ：</th>
+									<td>是</td>
+								</tr>
+
+							</table>
+						</div>
+						<div class="contItem">
+							2
+						</div>
+						<div class="contItem">
+							3
+						</div>
+						<div class="contItem">
+							4
+						</div>
+						<div class="contItem">
+							5
+						</div>
+						<div class="contItem">
+							6
+						</div>
+						<div class="contItem">
+							7
+						</div>
+						<div class="contItem">
+							8
+						</div>
+						<div class="contItem">
+							9
+						</div>
+					</div>
+				</div>
+			</div>
+
+		</div>
+
+		<script src="js/jquery.js" type="text/javascript" charset="utf-8"></script>
+		<script src="./js/easeljs.js"></script>
+		<script src="./js/tweenjs.js"></script>
+		<script src="layui/lay/modules/layer.js" type="text/javascript" charset="utf-8"></script>
+		<script type="text/javascript">
+			window.onload = function() {
+				//设置刷新频率
+				createjs.Ticker.addEventListener("tick", handleTick);
+				createjs.Ticker.setFPS(60);
+
+				//创建一个阶段，得到一个参考的画布
+				let stage = new createjs.Stage("loucengcanvas");
+
+				//创建一个形状的显示对象
+				let loucengbeijing = new createjs.Bitmap("./img/middle.png");
+
+				//设置数组存放位置
+				//资源池存储位置
+				let position = new Array();
+				let singeltodraw = new Array();
+				//描边
+				let circle = new Array();
+
+				//以下为攻击线路变量
+				//获取svg
+				var svgDom = document.getElementById("svg");
+				//根据攻击点，生成多个攻击矩形
+				let polygon = new Array();
+				//根据攻击矩形，设置多个攻击动画，与其一一对应
+				let animate = new Array();
+				//匀速流量线路变量(单条)
+				let data = new Array();
+				let path = [];
+				let refresh = 0;
+				//存所有路径数组
+				let allArr = new Array();
+
+				//多条流量线路变量
+				var polylineDom = document.getElementsByTagName("polyline");
+				let length = new Array();
+
+				//点击事件
+				//定义数组
+				let safeL = new Array();
+				let safeM = new Array();
+				//定义布尔值
+				let low = true;
+				let middle = true;
+				let high = true;
+				//以上点击事件变量
+
+				let timeAll = new Array();
+				let newArr = new Array();
+
+				//添加形状实例到舞台显示列表，stage为第一层
+				stage.addChild(loucengbeijing);
+
+				let sPosition = [{
+					"x": 412,
+					"y": 244,
+					"name": "b",
+					"word": "天融信安全审计",
+					"id": "C1"
+				}, {
+					"x": 438,
+					"y": 230,
+					"name": "b",
+					"word": "启明星辰入侵检测",
+					"id": "C2"
+				}, {
+					"x": 523,
+					"y": 184,
+					"name": "b",
+					"word": "启明星辰漏洞",
+					"id": "C5"
+				}, {
+					"x": 653,
+					"y": 78,
+					"name": "f",
+					"word": "迪普抗DDOS",
+					"id": "D4"
+				}, {
+					"x": 694,
+					"y": 100,
+					"name": "d",
+					"word": "深信服链路负载",
+					"id": "D5"
+				}, {
+					"x": 764,
+					"y": 98,
+					"name": "h",
+					"word": "网域防病毒网关",
+					"id": "D10"
+				}, {
+					"x": 804,
+					"y": 124,
+					"name": "f",
+					"word": "启明星辰入侵防御",
+					"id": "D11"
+				}, {
+					"x": 844,
+					"y": 150,
+					"name": "i",
+					"word": "启明星辰",
+					"id": "D12"
+				}, {
+					"x": 930,
+					"y": 186,
+					"name": "g",
+					"word": "迪普防火墙",
+					"id": "D15"
+				}, {
+					"x": 888,
+					"y": 206,
+					"name": "g",
+					"word": "迪普防火墙",
+					"id": "D14"
+				}, {
+					"x": 1000,
+					"y": 222,
+					"name": "g",
+					"word": "网域防火墙",
+					"id": "D17"
+				}, {
+					"x": 950,
+					"y": 246,
+					"name": "g",
+					"word": "网域防火墙",
+					"id": "D16"
+				}, {
+					"x": 1124,
+					"y": 200,
+					"name": "g",
+					"word": "天融信防火墙",
+					"id": "E3"
+				}, {
+					"x": 1080,
+					"y": 226,
+					"name": "g",
+					"word": "天融信防火墙",
+					"id": "E2"
+				}, {
+					"x": 864,
+					"y": 310,
+					"name": "g",
+					"word": "山石防火墙",
+					"id": "F3"
+				}, {
+					"x": 810,
+					"y": 336,
+					"name": "g",
+					"word": "山石防火墙",
+					"id": "F2"
+				}, {
+					"x": 680,
+					"y": 276,
+					"name": "g",
+					"word": "网神防火墙",
+					"id": "C8"
+				}, {
+					"x": 600,
+					"y": 456,
+					"name": "g",
+					"word": "启明星辰防火墙",
+					"id": "G9"
+				}, {
+					"x": 474,
+					"y": 376,
+					"name": "g",
+					"word": "东软防火墙",
+					"id": "B3"
+				}, {
+					"x": 128,
+					"y": 374,
+					"name": "iCloudDown",
+					"id": "A1"
+				}, {
+					"x": 268,
+					"y": 496,
+					"name": "iCloudDown",
+					"id": "A3"
+				}, {
+					"x": 334,
+					"y": 464,
+					"name": "iCloudDown",
+					"id": "A5"
+				}, {
+					"x": 258,
+					"y": 414,
+					"name": "k",
+					"id": "A4"
+				}, {
+					"x": 198,
+					"y": 444,
+					"name": "k",
+					"id": "A2"
+				}, {
+					"x": 268,
+					"y": 318,
+					"name": "net",
+					"id": "B1"
+				}, {
+					"x": 312,
+					"y": 294,
+					"name": "c",
+					"id": "B4"
+				}, {
+					"x": 350,
+					"y": 270,
+					"name": "c2",
+					"id": "B6"
+				}, {
+					"x": 340,
+					"y": 365,
+					"name": "a",
+					"id": "B2"
+				}, {
+					"x": 376,
+					"y": 342,
+					"name": "a",
+					"id": "B5"
+				}, {
+					"x": 414,
+					"y": 316,
+					"name": "a",
+					"id": "B7"
+				}, {
+					"x": 464,
+					"y": 212,
+					"name": "h",
+					"id": "C3"
+				}, {
+					"x": 494,
+					"y": 196,
+					"name": "h",
+					"id": "C4"
+				}, {
+					"x": 596,
+					"y": 250,
+					"name": "a",
+					"id": "C7"
+				}, {
+					"x": 574,
+					"y": 150,
+					"name": "c3",
+					"id": "C6"
+				}, {
+					"x": 554,
+					"y": 50,
+					"name": "person",
+					"id": "D1"
+				}, {
+					"x": 588,
+					"y": 30,
+					"name": "iCloudDown",
+					"id": "D2"
+				}, {
+					"x": 642,
+					"y": 0,
+					"name": "pic",
+					"id": "D3"
+				}, {
+					"x": 702,
+					"y": 134,
+					"name": "h",
+					"id": "D6"
+				}, {
+					"x": 746,
+					"y": 158,
+					"name": "f",
+					"id": "D7"
+				}, {
+					"x": 788,
+					"y": 184,
+					"name": "i",
+					"id": "D8"
+				}, {
+					"x": 832,
+					"y": 208,
+					"name": "l",
+					"id": "D9"
+				}, {
+					"x": 890,
+					"y": 174,
+					"name": "l",
+					"id": "D13"
+				}, {
+					"x": 786,
+					"y": 4,
+					"name": "c",
+					"id": "D27"
+				}, {
+					"x": 760,
+					"y": 24,
+					"name": "c",
+					"id": "D27"
+				}, {
+					"x": 808,
+					"y": 16,
+					"name": "c",
+					"id": "D27"
+				}, {
+					"x": 832,
+					"y": 28,
+					"name": "c",
+					"id": "D27"
+				}, {
+					"x": 780,
+					"y": 34,
+					"name": "c",
+					"id": "D27"
+				}, {
+					"x": 796,
+					"y": 58,
+					"name": "m",
+					"id": "D27"
+				}, {
+					"x": 856,
+					"y": 92,
+					"name": "a",
+					"id": "D26"
+				}, {
+					"x": 892,
+					"y": 50,
+					"name": "c",
+					"id": "D25"
+				}, {
+					"x": 914,
+					"y": 64,
+					"name": "c",
+					"id": "D24"
+				}, {
+					"x": 908,
+					"y": 122,
+					"name": "a",
+					"id": "D23"
+				}, {
+					"x": 938,
+					"y": 98,
+					"name": "j",
+					"id": "D22"
+				}, {
+					"x": 966,
+					"y": 114,
+					"name": "j",
+					"id": "D21"
+				}, {
+					"x": 994,
+					"y": 130,
+					"name": "j",
+					"id": "D20"
+				}, {
+					"x": 1024,
+					"y": 146,
+					"name": "j",
+					"id": "D19"
+				}, {
+					"x": 1058,
+					"y": 148,
+					"name": "c",
+					"id": "D18"
+				}, {
+					"x": 1088,
+					"y": 268,
+					"name": "c",
+					"id": "E20"
+				}, {
+					"x": 1072,
+					"y": 276,
+					"name": "c",
+					"id": "E20"
+				}, {
+					"x": 1056,
+					"y": 284,
+					"name": "c",
+					"id": "E20"
+				}, {
+					"x": 1040,
+					"y": 292,
+					"name": "c",
+					"id": "E20"
+				}, {
+					"x": 1120,
+					"y": 258,
+					"name": "a",
+					"id": "E4"
+				}, {
+					"x": 1150,
+					"y": 278,
+					"name": "a",
+					"id": "E5"
+				}, {
+					"x": 1200,
+					"y": 274,
+					"name": "a",
+					"id": "E13"
+				}, {
+					"x": 1234,
+					"y": 290,
+					"name": "a",
+					"id": "E14"
+				}, {
+					"x": 1278,
+					"y": 292,
+					"name": "g",
+					"id": "E15"
+				}, {
+					"x": 1300,
+					"y": 322,
+					"name": "a",
+					"id": "E16"
+				}, {
+					"x": 1332,
+					"y": 338,
+					"name": "a",
+					"id": "E17"
+				}, {
+					"x": 1396,
+					"y": 370,
+					"name": "iCloudDown",
+					"id": "E18"
+				}, {
+					"x": 1336,
+					"y": 410,
+					"name": "iCloudDown",
+					"id": "E12"
+				}, {
+					"x": 1260,
+					"y": 376,
+					"name": "a",
+					"id": "E11"
+				}, {
+					"x": 1224,
+					"y": 354,
+					"name": "a",
+					"id": "E10"
+				}, {
+					"x": 1162,
+					"y": 326,
+					"name": "a",
+					"id": "E8"
+				}, {
+					"x": 1202,
+					"y": 330,
+					"name": "g",
+					"id": "E9"
+				}, {
+					"x": 1136,
+					"y": 308,
+					"name": "a",
+					"id": "E7"
+				}, {
+					"x": 1080,
+					"y": 314,
+					"name": "c",
+					"id": "E6"
+				}, {
+					"x": 1106,
+					"y": 326,
+					"name": "c",
+					"id": "E6"
+				}, {
+					"x": 1132,
+					"y": 340,
+					"name": "c",
+					"id": "E6"
+				}, {
+					"x": 1158,
+					"y": 354,
+					"name": "c",
+					"id": "E6"
+				}, {
+					"x": 1182,
+					"y": 366,
+					"name": "c",
+					"id": "E6"
+				}, {
+					"x": 1208,
+					"y": 392,
+					"name": "m",
+					"id": "E6"
+				}, {
+					"x": 1012,
+					"y": 368,
+					"name": "c",
+					"id": "F9"
+				}, {
+					"x": 1036,
+					"y": 384,
+					"name": "c",
+					"id": "F9"
+				}, {
+					"x": 1062,
+					"y": 400,
+					"name": "c",
+					"id": "F9"
+				}, {
+					"x": 1088,
+					"y": 416,
+					"name": "c",
+					"id": "F9"
+				}, {
+					"x": 1114,
+					"y": 432,
+					"name": "c",
+					"id": "F9"
+				}, {
+					"x": 1024,
+					"y": 432,
+					"name": "m",
+					"id": "F9"
+				}, {
+					"x": 938,
+					"y": 452,
+					"name": "j",
+					"id": "F7"
+				}, {
+					"x": 998,
+					"y": 486,
+					"name": "j",
+					"id": "F8"
+				}, {
+					"x": 960,
+					"y": 332,
+					"name": "c",
+					"id": "F6"
+				}, {
+					"x": 910,
+					"y": 370,
+					"name": "a",
+					"id": "F5"
+				}, {
+					"x": 882,
+					"y": 390,
+					"name": "a",
+					"id": "F4"
+				}, {
+					"x": 880,
+					"y": 492,
+					"name": "j",
+					"id": "G6"
+				}, {
+					"x": 932,
+					"y": 520,
+					"name": "j",
+					"id": "G5"
+				}, {
+					"x": 856,
+					"y": 520,
+					"name": "c2",
+					"id": "G4"
+				}, {
+					"x": 812,
+					"y": 544,
+					"name": "c2",
+					"id": "G3"
+				}, {
+					"x": 730,
+					"y": 560,
+					"name": "a",
+					"id": "G2"
+				}, {
+					"x": 798,
+					"y": 590,
+					"name": "net",
+					"id": "G1"
+				}, {
+					"x": 698,
+					"y": 514,
+					"name": "a",
+					"id": "G7"
+				}, {
+					"x": 652,
+					"y": 488,
+					"name": "a",
+					"id": "G8"
+				}, {
+					"x": 660,
+					"y": 612,
+					"name": "iCloudDown",
+					"id": "H1"
+				}, {
+					"x": 620,
+					"y": 642,
+					"name": "iCloudDown",
+					"id": "H2"
+				}, {
+					"x": 582,
+					"y": 664,
+					"name": "iCloudDown",
+					"id": "H3"
+				}, {
+					"x": 502,
+					"y": 622,
+					"name": "l",
+					"id": "H6"
+				}, {
+					"x": 544,
+					"y": 600,
+					"name": "l",
+					"id": "H5"
+				}, {
+					"x": 584,
+					"y": 576,
+					"name": "l",
+					"id": "H4"
+				}, {
+					"x": 666,
+					"y": 380,
+					"name": "e",
+					"id": "I"
+				}, {
+					"x": 616,
+					"y": 350,
+					"name": "e",
+					"id": "I"
+				}, {
+					"x": 1240,
+					"y": 230,
+					"name": "c",
+					"id": "E19"
+				}, {
+					"x": 1260,
+					"y": 240,
+					"name": "c",
+					"id": "E19"
+				}]
+
+				//绘制图层，生成资源池、小图标，设置图标右击选中事件
+				$.ajax({
+					type: "get",
+					url: "data/icon-new.json",
+					async: true,
+					success: function(res) {
+						sPosition = res.sPosition;
+						sPosition.forEach(function(item, index) {
+							let name = sPosition[index].name;
+							//绘制图标
+							let dianjiimg = new createjs.Bitmap("./img/tubiao/" + name + ".png");
+							dianjiimg.x = sPosition[index].x;
+							dianjiimg.y = sPosition[index].y;
+							dianjiimg.id = sPosition[index].id;
+
+							//图标的点击事件
+							dianjiimg.addEventListener('click', function(e) {
+								if(e.nativeEvent.button === 2) {
+									stage.removeChild(circle);
+									if(name === "a" || name === "d" || name === "f" || name === "h" || name === "i" || name === "j") {
+										circle = new createjs.Bitmap("./img/border/blue/a.png");
+									} else if(name === "c3" || name === "net" || name === "person" || name === "pic") {
+										return
+									} else {
+										circle = new createjs.Bitmap("./img/border/blue/" + name + ".png");
+									}
+									circle.x = dianjiimg.x - 9;
+									circle.y = dianjiimg.y - 8;
+									stage.addChild(circle);
+									$(".tb_pop_opert").hide();
+									$(".tb_pop_opert1").empty();
+									$(".tb_pop_opert1").append(`<div><span class="detail">设备详情</span></div>`);
+
+									$(".tb_pop_opert1").css({
+										display: "block",
+										left: dianjiimg.x + 23,
+										top: dianjiimg.y + 24
+									});
+
+									$(".prompt").css({
+										"visibility": "hidden"
+									});
+
+									stage.update();
+									e.stopPropagation(); //阻止事件向上冒泡
+
+									$(document).one("click",
+										function() { //对document绑定一个隐藏Div方法
+											$(".tb_pop_opert1").hide();
+											$(".tb_pop_opert").hide();
+											event.stopPropagation(); //阻止事件向上冒泡
+											stage.removeChild(circle);
+										});
+
+									$(document).on("click", ".prompt-close", function() {
+										$(".prompt").css({
+											"visibility": "hidden"
+										});
+										stage.removeChild(circle);
+									})
+								}
+
+							});
+							stage.addChild(dianjiimg);
+
+						});
+
+					}
+				});
+
+				//				生成多条流量
+				//								$.ajax({
+				//									type: "get",
+				//									url: "data/line-new.json",
+				//									async: true,
+				//									success: function(res) {
+				//										let data = res.position1;
+				//										for(let i = 0; i < data.length; i++) {
+				//											length[i] = data[i];
+				//											polygon[i] = document.createElementNS('http://www.w3.org/2000/svg', 'polygon');
+				//											polygon[i].setAttribute("points", "5,1 0,1 -5,0 0,-1 5,-1");
+				//											svgDom.appendChild(polygon[i]);
+				//											animate[i] = document.createElementNS('http://www.w3.org/2000/svg', 'animateMotion');
+				//											animate[i].setAttribute("path", "M" + length[i]);
+				//											animate[i].setAttribute("rotate", "auto");
+				//											animate[i].setAttribute("begin", "0s");
+				//											animate[i].setAttribute("dur", "3s");
+				//											animate[i].setAttribute("repeatCount", "indefinite");
+				//											polygon[i].appendChild(animate[i]);
+				//				
+				//										}
+				//				
+				//									}
+				//								});
+
+				//逆转数组造数组（线的数据）
+				function reverse(attack, a) {
+					//逆转数组造数据
+					//存原来的路径数组，始终不变
+					let oldArr = new Array();
+					//存路径数组中的路径
+					let newArr = new Array();
+					//存反转过的路径数组
+					let change = new Array();
+
+					for(let i = 0; i < attack.length; i++) {
+						oldArr.push(attack[i]);
+						let arr = $.trim(oldArr[i].path);
+						let pathArr = arr.split(" ");
+						newArr = pathArr.reverse();
+						newArr = newArr.join(" ");
+						change[i] = {
+							"start": oldArr[i].end,
+							"end": oldArr[i].start,
+							"path": newArr
+						}
+					}
+
+					if(a) {
+						allArr = oldArr.concat(change);
+					} else {
+						allArr = oldArr
+					}
+					return allArr;
+				}
+
+				//填充数据
+				function hua(road, data, child) {
+					for(let i = 0; i < road.length; i++) {
+						for(let j = 0; j < allArr.length; j++) {
+							if(road[i].start == allArr[j].start && road[i].end == allArr[j].end) {
+								data.push(allArr[j].path);
+							}
+						}
+					}
+					let color;
+					for(let i = 0; i < data.length; i++) {
+						name = child + i;
+
+						if(road[i].color) {
+							color = road[i].color
+						} else {
+							color = "lime";
+						}
+
+						polygon = document.createElementNS('http://www.w3.org/2000/svg', 'polygon');
+						polygon.setAttribute("points", "8,1 0,1 -5,0 0,-1 8,-1");
+						polygon.setAttribute("id", name);
+						polygon.setAttribute("class", child);
+						polygon.setAttribute("fill", color);
+						svgDom.appendChild(polygon);
+					}
+				}
+
+				//根据res获取的path,得到每段dur的时间，push到path数组中
+				function line(data, path) {
+					for(let i = 0; i < data.length; i++) {
+						let line = [];
+						line[i] = $.trim(data[i]);
+						line[i] = line[i].split(" ");
+						let pathArr = [];
+						let pathAll = 0;
+						for(let j = 0; j < line[i].length; j++) {
+							pathArr.push(line[i][j].split(","));
+						}
+
+						for(let j = 0; j < pathArr.length; j++) {
+							if(j + 1 < pathArr.length) {
+								let path0_0 = Math.sqrt(Math.pow(pathArr[j + 1][0] - pathArr[j][0], 2) + Math.pow(pathArr[j + 1][1] - pathArr[j][1], 2));
+								pathAll += path0_0;
+							}
+						}
+						//path数组存的是每段路程经过的时间，即dur，dur=路程/速率，速率暂设为50单位长度/s
+						path.push(pathAll * 0.04);
+					}
+
+				}
+				//绘制动态效果animateMotion
+				function draw(data, path, polygon) {
+					for(let i = 0; i < data.length; i++) {
+						let pathSingle = data[i];
+						animate = document.createElementNS('http://www.w3.org/2000/svg', 'animateMotion');
+						animate.setAttribute("path", "M" + pathSingle);
+						animate.setAttribute("rotate", "auto");
+						animate.setAttribute("repeatCount", "indefinite");
+						animate.setAttribute("begin", "0s");
+						animate.setAttribute("dur", path[i] + "s");
+						$("#" + polygon + i)[0].appendChild(animate);
+					}
+
+				}
+
+				//撤回追踪溯源
+				function del(arr) {
+					$("." + arr).remove();
+				}
+
+				//绘制单条流量线路
+				$.ajax({
+					type: "get",
+					url: "data/line-new.json",
+					async: true,
+					success: function(res) {
+						let a = false;
+						reverse(res.position, a);
+
+						let road = res.line;
+						hua(road, data, "all");
+						line(data, path);
+						draw(data, path, "all");
+
+					}
+				});
+
+				//生成四种告警类型
+				$.ajax({
+					type: "get",
+					url: "data/icon-new.json",
+					async: true,
+					success: function(res) {
+						let data = res.type;
+						for(let i = 0; i < data.length; i++) {
+							$(".type").append(`<div class="${data[i].type} active"><img class="${data[i].type}" src="img/icon/light/${data[i].img}"/>${data[i].name}</div>`)
+						}
+					}
+				});
+
+				//生成三种告警状态
+				$.ajax({
+					type: "get",
+					url: "data/icon-new.json",
+					async: true,
+					success: function(res) {
+						let data = res.level;
+						let type = res.type;
+						for(let i = 0; i < data.length; i++) {
+							$(".level").append(`<div class="${data[i].type} active"><div class=${data[i].img}></div>${data[i].name}</div>`)
+						}
+					}
+				});
+
+				//传入数组，画选中状态和图标
+				function paint(list, arr, pic) {
+					list.forEach(function(item, index) {
+						sPosition.forEach(function(item, i) {
+							let name = sPosition[i].name;
+							let type = list[index].type;
+							let color = list[index].level;
+							if(name === "c3" || name === "net" || name === "person" || name === "pic") {
+								name = "";
+							} else if(name === "a" || name === "d" || name === "f" || name === "h" || name === "i" || name === "j") {
+								name = "a";
+							};
+
+							if(list[index].id === sPosition[i].id && name) {
+								arr[index] = new createjs.Bitmap("./img/border/" + color + "/" + name + ".png");
+								arr[index].x = sPosition[i].x - 9;
+								arr[index].y = sPosition[i].y - 8;
+								arr[index].visible = true;
+
+								newArr[index] = new createjs.Bitmap("./img/tubiao/" + name + ".png");
+								newArr[index].x = sPosition[i].x;
+								newArr[index].y = sPosition[i].y;
+								newArr[index].name = sPosition[i].name;
+								newArr[index].id = sPosition[i].id;
+								newArr[index].dianji = false;
+								newArr[index].visible = true;
+
+								pic[index] = new createjs.Bitmap("./img/type/" + color + "/" + type + ".png");
+								pic[index].x = sPosition[i].x - 5;
+								pic[index].y = sPosition[i].y - 50;
+								pic[index].visible = true;
+							}
+
+							stage.addChild(arr[index]);
+							stage.addChild(pic[index]);
+							stage.addChild(newArr[index]);
+						});
+
+						timeAll.push(setInterval(function() {
+							createjs.Tween.get(arr[index]).to({
+								alpha: 1
+							}, 800).to({
+								alpha: 0.2
+							}, 800).call(handleComplete);
+
+							function handleComplete() {
+								//渐变完成执行
+								//									console.log("end")
+							}
+						}, 2000));
+						let dianji = true;
+						track(newArr[index]);
+						newArr[index].addEventListener('click', function(e) {
+							$(".tb_pop_opert1").hide();
+							if(e.nativeEvent.button === 2) {
+								let nName = newArr[index].name;
+
+								newArr[index].dianji = dianji;
+								stage.removeChild(circle);
+								if(nName === "a" || nName === "d" || nName === "f" || nName === "h" || nName === "i" || nName === "j") {
+									circle = new createjs.Bitmap("./img/border/blue/a.png");
+								} else if(nName === "c3" || nName === "net" || nName === "person" || nName === "pic") {
+									return
+								} else {
+									circle = new createjs.Bitmap("./img/border/blue/" + nName + ".png");
+								}
+								circle.x = newArr[index].x - 9;
+								circle.y = newArr[index].y - 8;
+								stage.addChild(circle);
+								if(newArr[index].check === true) {
+									$(".tb_pop_opert .track").html("取消溯源").removeClass("track").addClass("cancel");
+								} else {
+									$(".tb_pop_opert .cancel").html("追踪溯源").removeClass("cancel").addClass("track");
+								}
+
+								$(".tb_pop_opert .track").attr("data-id", newArr[index].id);
+								$(".tb_pop_opert .on").attr("data-id", newArr[index].id);
+
+								$(".tb_pop_opert").css({
+									display: "block",
+									left: newArr[index].x + 30,
+									top: newArr[index].y + 20
+								});
+								$(document).one("click",
+									function() { //对document绑定一个隐藏Div方法
+										$(".tb_pop_opert").hide();
+										event.stopPropagation(); //阻止事件向上冒泡
+									});
+
+							} else if(e.nativeEvent.button === 0) {
+								del("simple");
+							}
+						});
+
+					});
+
+				}
+
+				//右键生成设备详情、策略下发等
+				function track(arr) {
+					$(".tb_pop_opert").empty();
+					$(".tb_pop_opert").append(`<div><span class="detail">设备详情</span>
+					<span class="on">策略下发</span>
+					<span class="track">追踪溯源</span></div>`);
+					$(document).one("click",
+						function() { //对document绑定一个隐藏Div方法
+							$(".tb_pop_opert").hide();
+							event.stopPropagation(); //阻止事件向上冒泡
+						});
+
+				}
+
+				//绘制单条线
+				$.ajax({
+					type: "get",
+					url: "data/line-new.json",
+					async: true,
+					success: function(res) {
+						let a = true;
+						reverse(res.position, a);
+
+						let listAttack = res.listAttack;
+						let position = res.position;
+						let id;
+						let click = true;
+
+						//点击追踪溯源，画线
+						$(document).on("click", ".track", function() {
+
+							id = $(this).attr("data-id");
+							del("simple");
+
+							let data1 = [];
+							let path1 = [];
+
+							listAttack.forEach(function(item, index) {
+								if(id == listAttack[index].id) {
+									hua(listAttack[index].list, data1, "simple");
+									line(data1, path1);
+									draw(data1, path1, "simple");
+								}
+							});
+
+							let arr = new Array();
+							arr = stage.children;
+							arr.forEach(function(item, index) {
+								if(arr[index].id === id) {
+									arr[index].check = true;
+								} else {
+									arr[index].check = false;
+								}
+							})
+						});
+
+						$(document).on("click", ".cancel", function() {
+
+							id = $(this).attr("data-id");
+							del("simple");
+
+							let arr = new Array();
+							arr = stage.children;
+							arr.forEach(function(item, index) {
+								if(arr[index].id === id) {
+									arr[index].check = false;
+								}
+							});
+							$(".tb_pop_opert .cancel").html("追踪溯源").removeClass("cancel").addClass("track");
+						});
+
+						//策略下发弹框
+						function alert() {
+							layer.open({
+								type: 2,
+								skin: 'layui-layer-rim', //加上边框
+								area: ['70%', '80%'], //宽高
+								content: "html",
+								shadeClose: true, //开启遮罩关闭
+							});
+
+						}
+
+						//策略下发生成弹框
+						$(document).on("click", ".on", function() {
+							alert();
+							del("simple");
+							let arr = new Array();
+							arr = stage.children;
+							arr.forEach(function(item, index) {
+								if(arr[index].id === id) {
+									arr[index].check = false;
+								}
+							});
+						})
+
+					}
+				});
+
+				//点击时显示与隐藏
+				function show(list, hide) {
+					list.forEach(function(item, index) {
+						let arr = new Array();
+						arr = stage.children;
+						sPosition.forEach(function(item, i) {
+							if(list[index].id === sPosition[i].id) {
+								arr.forEach(function(item, j) {
+									let x1 = arr[j].x + 9;
+									let y1 = arr[j].y + 8;
+
+									let x2 = arr[j].x + 5;
+									let y2 = arr[j].y + 50;
+
+									if((sPosition[i].x === x1 && sPosition[i].y === y1) || (sPosition[i].x === x2 && sPosition[i].y === y2)) {
+										arr[j].visible = hide;
+									}
+								})
+
+							}
+
+						});
+
+					});
+				}
+
+				//点击四类三状态
+				$.ajax({
+					type: "get",
+					url: "data/icon-new.json",
+					async: true,
+					success: function(res) {
+						//list1为安全类列表
+						let list1 = new Array();
+						//list2为性能类列表
+						let list2 = new Array();
+						//list3为配置类列表
+						let list3 = new Array();
+						//list4为状态类列表
+						let list4 = new Array();
+						//获取出现的状态
+						listAll = res.listAll;
+
+						//循环listAll,给1-4list赋值
+						for(let i = 0; i < listAll.length; i++) {
+							if(listAll[i].type == "safe") {
+								list1.push(listAll[i]);
+							} else if(listAll[i].type == "able") {
+								list2.push(listAll[i]);
+							} else if(listAll[i].type == "setting") {
+								list3.push(listAll[i]);
+							} else if(listAll[i].type == "offLine") {
+								list4.push(listAll[i]);
+							}
+						}
+
+						//绘制点
+						paint(listAll, safeL, safeM);
+
+						//绑定点击事件
+						click("safe", low, middle, high, list1);
+						click("able", low, middle, high, list2);
+						click("setting", low, middle, high, list3);
+						click("offLine", low, middle, high, list4);
+
+						function click(name, low, middle, high, list) {
+							let listA = new Array;
+							let listB = new Array;
+							let listC = new Array;
+							for(let i = 0; i < list.length; i++) {
+								if(list[i].level == "yellow") {
+									listA.push(list[i]);
+								} else if(list[i].level == "orange") {
+									listB.push(list[i]);
+								} else if(list[i].level == "red") {
+									listC.push(list[i]);
+								}
+							}
+
+							let checked = true;
+							$(document).on("click", ".type>div." + name, function() {
+
+								if($(this).hasClass("active")) {
+									$(this).removeClass("active");
+									$(this).children().attr("src", "img/icon/grey/" + name + ".png");
+									checked = false;
+								} else {
+									$(this).addClass("active");
+									$(this).children().attr("src", "img/icon/light/" + name + ".png");
+									checked = true;
+								}
+
+								if(checked) {
+									show(listA, low);
+									show(listB, middle);
+									show(listC, high);
+								} else {
+									show(listA, checked);
+									show(listB, checked);
+									show(listC, checked);
+								}
+
+							});
+
+							$(document).on("click", ".level>div", function() {
+								if($(this).hasClass("low")) {
+									if(low) {
+										$(this).removeClass("active");
+									} else {
+										$(this).addClass("active");
+									}
+									low = !low;
+								} else if($(this).hasClass("middle")) {
+									if(middle) {
+										$(this).removeClass("active");
+									} else {
+										$(this).addClass("active");
+									}
+									middle = !middle;
+								} else if($(this).hasClass("high")) {
+									if(high) {
+										$(this).removeClass("active");
+									} else {
+										$(this).addClass("active");
+									}
+									high = !high;
+								}
+
+								if(checked) {
+									show(listA, low);
+									show(listB, middle);
+									show(listC, high);
+
+								} else {
+									show(listA, checked);
+									show(listB, checked);
+									show(listC, checked);
+								}
+
+							});
+
+						}
+
+					}
+				});
+
+				//绘制弹框
+				$.ajax({
+					type: "get",
+					url: "data/icon-new.json",
+					async: true,
+					success: function(res) {
+						prompt = res.prompt;
+						prompt.forEach(function(item, i) {
+							//绘制图标
+							$(".prompt-tab").append(`<div>
+							<img data-name=${prompt[i].name} src="img/prompt/normal/${prompt[i].name}.png"/>
+						</div>`)
+						});
+						//默认首选项选中
+						$(".prompt-tab>div:first-child").addClass("prompt-active");
+
+					}
+				});
+
+				//点击设备详情,出现弹框
+				$(document).on("click", ".detail", function() {
+					$(".prompt").css({
+						"visibility": "visible"
+					});
+
+				});
+
+				$("#loucengcanvas").on("click", function() {
+					$(".prompt").css({
+						"visibility": "hidden"
+					});
+				})
+
+				//资产详情弹框tab切换
+				$(document).on("click", ".prompt-tab>div", function() {
+					$this = $(this);
+					$idx = $this.index();
+					$this.addClass("prompt-active").siblings().removeClass("prompt-active");
+					$('.prompt-container .contItem').eq($idx).show().siblings().hide();
+				});
+
+				//防止触发默认点击事件
+				document.getElementById("loucengcanvas").oncontextmenu = function(e) {
+					e.preventDefault();
+				};
+
+				function handleTick() {
+					stage.update();
+				}
+
+			}
+		</script>
+	</body>
+
+</html>

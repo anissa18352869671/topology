@@ -1,0 +1,304 @@
+* {
+	margin: 0;
+	padding: 0;
+	list-style: none;
+	outline: 0;
+}
+
+html,
+body {
+	width: 100%;
+	height: 100%;
+}
+
+body {
+	background: url(../img/topo_bg.jpg)no-repeat;
+}
+
+i.fa {
+	font-size: 18px;
+	color: #FFFFFF;
+	cursor: pointer;
+}
+
+a {
+	text-decoration: none;
+}
+
+.bg {
+	position: absolute;
+	left: calc(50% - 726.5px);
+	top: calc(50% - 370px);
+	width: 1453px;
+	height: 740px;
+}
+
+
+/*图标右键*/
+.tb_pop_opert {
+	background: rgba(0,0,0,.65);
+    width: 90px;
+    border: 1px solid #4dd2ff;
+    position: absolute;
+    top: 0px;
+    left: 0px;
+    display: none;
+    z-index: 3;
+    color: #66CCFF;
+}
+
+.tb_pop_opert span {
+	display: block;
+	text-align: center;
+	padding: 5px 0;
+	cursor: pointer;
+}
+
+.legnd {
+	position: absolute;
+	bottom: 150px;
+	top: auto;
+	right: 450px;
+	left: auto;
+	z-index: 1;
+}
+
+#svg {
+	position: absolute;
+	top: 0;
+	left: 0;
+	right: 0;
+	bottom: 0;
+	pointer-events: none;
+}
+
+#middle {
+	position: absolute;
+	top: 0;
+	left: 0;
+	right: 0;
+	bottom: 0;
+	pointer-events: none;
+}
+
+polygon {
+	fill: lime;
+}
+polygon:last-child{
+	fill: #000;
+}
+polyline {
+	visibility: hidden;
+}
+
+.type {
+	width: 565px;
+	position: absolute;
+	top: 0px;
+	left: calc(50% - 282.5px);
+	display: flex;
+	margin-top: 21px;
+	z-index: 1000;
+}
+
+.type div {
+	flex: 1;
+	border: 1px solid #4dd2ff;
+	height: 30px;
+	line-height: 30px;
+	color: #ffffff;
+	padding: 0px 20px;
+	box-sizing: border-box;
+	text-align: right;
+	font-size: 14px;
+	cursor: pointer;
+	opacity: 0.3;
+}
+
+.type div img {
+	float: left;
+	margin-top: 2px;
+}
+
+.type div:last-child {
+	border-right: 1px solid #4dd2ff;
+}
+
+.type .active {
+	opacity: 1;
+	background: rgba(77, 210, 255, 0.5);
+}
+
+.level {
+	width: 412px;
+	height: 30px;
+	position: absolute;
+	top: auto;
+	bottom: 63px;
+	left: calc(50% - 206px);
+	display: flex;
+	z-index: 1000;
+}
+
+.level>div {
+	flex: 1;
+	background: transparent;
+	border: 1px solid #4dd2ff;
+	height: 30px;
+	line-height: 30px;
+	color: #ffffff;
+	padding: 0px 26px;
+	box-sizing: border-box;
+	text-align: center;
+	font-size: 14px;
+	cursor: pointer;
+	opacity: 0.3;
+}
+
+.level>div>div {
+	width: 14px;
+	height: 14px;
+	display: inline-block;
+	vertical-align: sub;
+	margin: 0px 5px;
+	border-radius: 50%;
+}
+
+.level>div:last-child {
+	border-right: 1px solid #4dd2ff;
+}
+
+.level .active {
+	opacity: 1;
+	background: rgba(77, 210, 255, 0.5);
+}
+
+.yellow {
+	background: #ffff00;
+}
+
+.orange {
+	background: #fc7304;
+}
+
+.red {
+	background: #ff0000;
+}
+
+.prompt {
+	width: 381px;
+	height: 562px;
+	background: url(../img/prompt.png)no-repeat;
+	position: absolute;
+	top: 0;
+	right: 0;
+	visibility: hidden;
+	z-index: 1001;
+}
+
+.prompt-title {
+	height: 49px;
+	line-height: 55px;
+	text-align: center;
+	color: #FFFFFF;
+}
+
+.prompt-close {
+	position: absolute;
+	right: 20px;
+	font-size: 26px;
+	cursor: pointer;
+}
+
+.prompt-tab {
+	width: 379px;
+	height: 44px;
+	line-height: 44px;
+	display: flex;
+	border-bottom: solid 1px #00bfff;
+	margin-left: 1px;
+}
+
+.prompt-tab>div {
+	flex: 1;
+	text-align: center;
+	background: rgba(0, 191, 255, 0.2);
+}
+
+.prompt-tab>div>img {
+	width: 22px;
+	height: 22px;
+	vertical-align: middle;
+}
+
+.prompt-tab>div.prompt-active {
+	background: transparent;
+	border: solid 1px #00bfff;
+	border-top: 0px;
+	border-bottom: 0px;
+}
+
+.prompt-tab>div.prompt-active i.fa {
+	color: #00bfff;
+}
+
+.prompt-container {
+	width: 100%;
+	margin-left: 1px;
+	height: 467px;
+	color: rgba(255, 255, 255, .65);
+}
+
+.contItem.current {
+	display: block;
+	width: 100%;
+	height: 100%;
+}
+
+.contItem {
+	display: none;
+}
+
+.detail-title {
+	width: 100%;
+	height: 43px;
+	line-height: 43px;
+	padding: 0px 20px;
+	box-sizing: border-box;
+	color: #00bfff;
+	font-size: 14px;
+	font-weight: bold;
+}
+
+.detail-table {
+	width: 100%;
+	font-size: 14px;
+}
+
+.detail-table tr {
+	height: 38px;
+	line-height: 38px;
+	border-collapse: collapse;
+}
+
+.detail-table th {
+	width: 38%;
+	text-align: right;
+	padding: 0px 12px;
+	box-sizing: border-box;
+	border: solid 1px rgba(255, 255, 255, .2);
+	border-bottom: 0;
+	border-right: 0;
+}
+
+.detail-table td {
+	width: 62%;
+	border: solid 1px rgba(255, 255, 255, .2);
+	border-bottom: 0;
+	color: #FFFFFF;
+	padding: 0px 12px;
+	box-sizing: border-box;
+}
+.detail-table tr:last-child th,.detail-table tr:last-child td{
+	border-bottom: solid 1px rgba(255, 255, 255, .2);
+}

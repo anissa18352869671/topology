@@ -1,0 +1,694 @@
+<!DOCTYPE html>
+<html>
+
+	<head>
+		<meta charset="UTF-8">
+		<title></title>
+		<link rel="stylesheet" type="text/css" href="css/index.css" />
+	</head>
+
+	<body>
+		<div id="loucengbox">
+			<img class="legnd" src="img/tb_legnd.png" />
+			<div class="type">
+				<div class="safe active"><img class="safe" src="img/icon/light/safe.png">安全类告警</div>
+				<div class="able active"><img class="able" src="img/icon/light/able.png">性能类告警</div>
+				<div class="setting active"><img class="setting" src="img/icon/light/setting.png">配置类告警</div>
+				<div class="offLine active"><img class="offLine" src="img/icon/light/offLine.png">状态类告警</div>
+			</div>
+			<div class="btn">
+				<div class="level safe">
+					<div class="low active">
+						<div class="yellow"></div>低危</div>
+					<div class="middle active">
+						<div class="orange"></div>中危</div>
+					<div class="high active">
+						<div class="red"></div>高危</div>
+				</div>
+			</div>
+			<div class="bg">
+				<canvas width="1453" height="740" id="loucengcanvas"></canvas>
+				<svg width="1453" height="740" id="svg" xmlns="http://www.w3.org/2000/svg">
+				</svg>
+
+				<div class="tb_pop_opert" id="tb_pop_opert">
+				</div>
+				<div class="prompt">
+					<div class="prompt-title">
+						资产详情
+						<span class="prompt-close">×</span>
+					</div>
+					<div class="prompt-tab">
+					</div>
+					<div class="prompt-container">
+						<div class="contItem current">
+							<div class="detail-title">
+								基本信息
+							</div>
+							<table class="detail-table" cellspacing="0">
+								<tr>
+									<th>资产类型：</th>
+									<td>主机</td>
+								</tr>
+								<tr>
+									<th> 资产名称：</th>
+									<td>国瑞信安</td>
+								</tr>
+								<tr>
+									<th> 主IP：</th>
+									<td>172.16.18.223</td>
+								</tr>
+								<tr>
+									<th> 资产编号：</th>
+									<td>172.16.18.223</td>
+								</tr>
+								<tr>
+									<th>操作系统：</th>
+									<td>windows</td>
+								</tr>
+								<tr>
+									<th> 资产责任人：</th>
+									<td>一些文本</td>
+								</tr>
+								<tr>
+									<th> 运维工程师：</th>
+									<td>一些文本</td>
+								</tr>
+								<tr>
+									<th> 资产价值 ：</th>
+									<td>一些文本</td>
+								</tr>
+								<tr>
+									<th> 是否核心资产 ：</th>
+									<td>是</td>
+								</tr>
+
+							</table>
+						</div>
+						<div class="contItem">
+							2
+						</div>
+						<div class="contItem">
+							3
+						</div>
+						<div class="contItem">
+							4
+						</div>
+						<div class="contItem">
+							5
+						</div>
+						<div class="contItem">
+							6
+						</div>
+						<div class="contItem">
+							7
+						</div>
+						<div class="contItem">
+							8
+						</div>
+						<div class="contItem">
+							9
+						</div>
+					</div>
+				</div>
+			</div>
+
+		</div>
+
+		<script src="js/jquery.js" type="text/javascript" charset="utf-8"></script>
+		<script src="./js/easeljs.js"></script>
+		<script src="./js/tweenjs.js"></script>
+
+		<script type="text/javascript">
+			window.onload = function() {
+				//设置刷新频率
+				createjs.Ticker.addEventListener("tick", handleTick);
+				createjs.Ticker.setFPS(60);
+
+				//创建一个阶段，得到一个参考的画布
+				let stage = new createjs.Stage("loucengcanvas");
+
+				//创建一个形状的显示对象
+				let loucengbeijing = new createjs.Bitmap("./img/middle.png");
+
+				//设置数组存放位置
+				//资源池存储位置
+				let position = new Array();
+				let singeltodraw = new Array();
+				//描边
+				let circle = new Array();
+
+				//以下为攻击线路变量
+				//获取svg
+				var svgDom = document.getElementById("svg");
+				//根据攻击点，生成多个攻击矩形
+				let polygon = new Array();
+				//根据攻击矩形，设置多个攻击动画，与其一一对应
+				let animate = new Array();
+				//匀速流量线路变量(单条)
+				let data = new Array();
+				let path = [];
+				let refresh = 0;
+				//存所有路径数组
+				let allArr = new Array();
+
+				//多条流量线路变量
+				var polylineDom = document.getElementsByTagName("polyline");
+				let length = new Array();
+
+				//点击事件
+				//定义数组
+				let safeL = new Array();
+				let safeM = new Array();
+				//定义布尔值
+				let low = true;
+				let middle = true;
+				let high = true;
+				//以上点击事件变量
+
+				let timeAll = new Array();
+				let newArr = new Array();
+
+				//添加形状实例到舞台显示列表，stage为第一层
+				stage.addChild(loucengbeijing);
+
+				//绘制图层，生成资源池、小图标，设置图标右击选中事件
+				$.ajax({
+					type: "get",
+					url: "data/icon.json",
+					async: true,
+					success: function(res) {
+						sPosition = res.sPosition;
+						sPosition.forEach(function(item, index) {
+							let name = sPosition[index].name;
+							//绘制图标
+							let dianjiimg = new createjs.Bitmap("./img/tubiao/" + name + ".png");
+							dianjiimg.x = sPosition[index].x;
+							dianjiimg.y = sPosition[index].y;
+							dianjiimg.id = sPosition[index].id;
+							//图标的点击事件
+							dianjiimg.addEventListener('click', function(e) {
+								if(e.nativeEvent.button === 2) {
+									stage.removeChild(circle);
+									if(name === "a" || name === "d" || name === "f" || name === "h" || name === "i" || name === "j") {
+										circle = new createjs.Bitmap("./img/border/blue/a.png");
+									} else if(name === "c3" || name === "net" || name === "person" || name === "pic") {
+										return
+									} else {
+										circle = new createjs.Bitmap("./img/border/blue/" + name + ".png");
+									}
+
+									$(".tb_pop_opert").empty();
+									$(".tb_pop_opert").append(`<div><span class="detail">设备详情</span></div>`);
+
+									$(".tb_pop_opert").css({
+										display: "block",
+										left: dianjiimg.x + 20,
+										top: dianjiimg.y + 24
+									});
+									console.log(dianjiimg.id)
+
+									//									let left = dianjiimg.x;
+									//									let top = dianjiimg.y;
+									//									if(left > 800) {
+									//										left = left - 500;
+									//									}
+									//									if(top < 200) {
+									//										top = top + 50;
+									//									} else if(top < 300 && top > 200) {
+									//										top = top - 50
+									//									} else if(top > 300 && top < 450) {
+									//										top = top - 360;
+									//										console.log(3)
+									//									} else if(top > 450) {
+									//										top = top - 450;
+									//										console.log(4)
+									//									}
+									//
+									//									$(".prompt").css({
+									//										"left": left + 50,
+									//										"top": top,
+									//										"visibility": "hidden"
+									//									});
+
+									$(".prompt").css({
+										"visibility": "hidden"
+									});
+
+									circle.x = dianjiimg.x - 9;
+									circle.y = dianjiimg.y - 8;
+									stage.addChild(circle);
+									stage.update();
+									e.stopPropagation(); //阻止事件向上冒泡
+
+									$(document).one("click",
+										function() { //对document绑定一个隐藏Div方法
+											$(".tb_pop_opert").hide();
+											event.stopPropagation(); //阻止事件向上冒泡
+										});
+
+									$(document).on("click", ".prompt-close", function() {
+										$(".prompt").css({
+											"visibility": "hidden"
+										});
+										stage.removeChild(circle);
+									})
+								}
+
+							});
+							stage.addChild(dianjiimg);
+
+						});
+
+					}
+				});
+
+				//				生成多条流量
+				//								$.ajax({
+				//									type: "get",
+				//									url: "data/line.json",
+				//									async: true,
+				//									success: function(res) {
+				//										let data = res.position1;
+				//										for(let i = 0; i < data.length; i++) {
+				//											length[i] = data[i];
+				//											polygon[i] = document.createElementNS('http://www.w3.org/2000/svg', 'polygon');
+				//											polygon[i].setAttribute("points", "5,1 0,1 -5,0 0,-1 5,-1");
+				//											svgDom.appendChild(polygon[i]);
+				//											animate[i] = document.createElementNS('http://www.w3.org/2000/svg', 'animateMotion');
+				//											animate[i].setAttribute("path", "M" + length[i]);
+				//											animate[i].setAttribute("rotate", "auto");
+				//											animate[i].setAttribute("begin", "0s");
+				//											animate[i].setAttribute("dur", "3s");
+				//											animate[i].setAttribute("repeatCount", "indefinite");
+				//											polygon[i].appendChild(animate[i]);
+				//				
+				//										}
+				//				
+				//									}
+				//								});
+
+				//逆转数组造数组（线的数据）
+				function reverse(attack) {
+					//逆转数组造数据
+					//存原来的路径数组，始终不变
+					let oldArr = new Array();
+					//存路径数组中的路径
+					let newArr = new Array();
+					//存反转过的路径数组
+					let change = new Array();
+
+					for(let i = 0; i < attack.length; i++) {
+						oldArr.push(attack[i]);
+						let arr = $.trim(oldArr[i].path);
+						let pathArr = arr.split(" ");
+						newArr = pathArr.reverse();
+						newArr = newArr.join(" ");
+						change[i] = {
+							"start": oldArr[i].end,
+							"end": oldArr[i].start,
+							"path": newArr
+						}
+					}
+					allArr = oldArr.concat(change);
+					return allArr;
+				}
+
+				//绘制单条流量线路
+				$.ajax({
+					type: "get",
+					url: "data/line.json",
+					async: true,
+					success: function(res) {
+						reverse(res.position);
+
+						for(let i = 0; i < res.list.length; i++) {
+							for(let j = 0; j < allArr.length; j++) {
+								if(res.list[i] == allArr[j].start && res.list[i + 1] == allArr[j].end) {
+									data.push(allArr[j].path);
+								}
+							}
+						}
+
+						for(let i = 0; i < data.length; i++) {
+							polygon = document.createElementNS('http://www.w3.org/2000/svg', 'polygon');
+							polygon.setAttribute("points", "8,1 0,1 -5,0 0,-1 8,-1");
+							polygon.setAttribute("id", "polygon" + i);
+							polygon.setAttribute("fill", "freeze")
+							svgDom.appendChild(polygon);
+						}
+
+						let aaa = document.createElementNS('http://www.w3.org/2000/svg', 'polygon');
+						aaa.setAttribute("points", "8,1 0,1 -5,0 0,-1 8,-1");
+						aaa.setAttribute("fill", "#000")
+						svgDom.appendChild(aaa);
+
+						//根据res获取的path,得到每段dur的时间，push到path数组中
+						function line(data, path) {
+							for(let i = 0; i < data.length; i++) {
+								let line = [];
+								line[i] = $.trim(data[i]);
+								line[i] = line[i].split(" ");
+								let pathArr = [];
+								let pathAll = 0;
+								for(let j = 0; j < line[i].length; j++) {
+									pathArr.push(line[i][j].split(","));
+								}
+
+								for(let j = 0; j < pathArr.length; j++) {
+									if(j + 1 < pathArr.length) {
+										let path0_0 = Math.sqrt(Math.pow(pathArr[j + 1][0] - pathArr[j][0], 2) + Math.pow(pathArr[j + 1][1] - pathArr[j][1], 2));
+										pathAll += path0_0;
+									}
+								}
+								//path数组存的是每段路程经过的时间，即dur，dur=路程/速率，速率暂设为50单位长度/s
+								path.push(pathAll * 0.04);
+							}
+
+						}
+
+						function draw() {
+							$("polygon").empty();
+							for(let i = 0; i < data.length; i++) {
+								let pathSingle = data[i];
+								animate = document.createElementNS('http://www.w3.org/2000/svg', 'animateMotion');
+								animate.setAttribute("path", "M" + pathSingle);
+								animate.setAttribute("rotate", "auto");
+								let index = i - 1;
+								if($("#animate" + index)[0]) {
+									animate.setAttribute("begin", "animate" + index + ".end");
+								} else {
+									animate.setAttribute("begin", refresh + "s");
+								}
+
+								animate.setAttribute("id", "animate" + i);
+								animate.setAttribute("dur", path[i] + "s");
+								$("#polygon" + i)[0].appendChild(animate);
+								refresh += path[i];
+							}
+						}
+
+						line(data, path);
+						draw();
+						setInterval(draw, refresh * 1000);
+
+					}
+				});
+
+				//生成四种告警类型
+				$.ajax({
+					type: "get",
+					url: "data/icon.json",
+					async: true,
+					success: function(res) {
+						let data = res.type;
+						for(let i = 0; i < data.length; i++) {
+							$(".type").append(`<div class="${data[i].type} active"><img class="${data[i].type}" src="img/icon/light/${data[i].img}"/>${data[i].name}</div>`)
+						}
+					}
+				});
+
+				//生成三种告警状态
+				$.ajax({
+					type: "get",
+					url: "data/icon.json",
+					async: true,
+					success: function(res) {
+						let data = res.level;
+						let type = res.type;
+						for(let i = 0; i < data.length; i++) {
+							$(".level").append(`<div class="${data[i].type} active"><div class=${data[i].img}></div>${data[i].name}</div>`)
+						}
+					}
+				});
+
+				//传入数组，画选中状态和图标
+				function paint(list, arr, pic) {
+					list.forEach(function(item, index) {
+						sPosition.forEach(function(item, i) {
+							let name = sPosition[i].name;
+							let type = list[index].type;
+							let color = list[index].level;
+							if(name === "c3" || name === "net" || name === "person" || name === "pic") {
+								name = "";
+							} else if(name === "a" || name === "d" || name === "f" || name === "h" || name === "i" || name === "j") {
+								name = "a";
+							};
+
+							if(list[index].id === sPosition[i].id && name) {
+								arr[index] = new createjs.Bitmap("./img/border/" + color + "/" + name + ".png");
+								arr[index].x = sPosition[i].x - 9;
+								arr[index].y = sPosition[i].y - 8;
+								arr[index].visible = true;
+
+								newArr[index] = new createjs.Bitmap("./img/tubiao/" + name + ".png");
+								newArr[index].x = sPosition[i].x;
+								newArr[index].y = sPosition[i].y;
+								newArr[index].id = sPosition[i].id;
+								newArr[index].visible = true;
+
+								pic[index] = new createjs.Bitmap("./img/type/" + color + "/" + type + ".png");
+								pic[index].x = sPosition[i].x - 5;
+								pic[index].y = sPosition[i].y - 50;
+								pic[index].visible = true;
+							}
+
+						});
+
+						timeAll.push(setInterval(function() {
+							arr[index].alpha = 0;
+							createjs.Tween.get(arr[index]).to({
+								alpha: 1
+							}, 800).to({
+								alpha: 0.5
+							}, 800).call(handleComplete);
+
+							function handleComplete() {
+								//渐变完成执行
+								//									console.log("end")
+							}
+						}, 2000));
+
+						newArr[index].addEventListener('click', function(e) {
+							$(".tb_pop_opert").empty();
+							$(".tb_pop_opert").append(`<div><span class="detail">设备详情</span>
+					<span>策略下发</span>
+					<span class="track">追踪溯源</span></div>`);
+
+							$(".tb_pop_opert").css({
+								display: "block",
+								left: newArr[index].x + 11,
+								top: newArr[index].y + 16
+							});
+							$(".tb_pop_opert .track").attr("data-id", newArr[index].id);
+							console.log(newArr[index].id)
+						})
+						stage.addChild(newArr[index]);
+
+						stage.addChild(arr[index]);
+						stage.addChild(pic[index]);
+					});
+
+				}
+
+				//点击时显示与隐藏
+				function show(list, hide) {
+					list.forEach(function(item, index) {
+						let arr = new Array();
+						arr = stage.children;
+						sPosition.forEach(function(item, i) {
+							if(list[index].id === sPosition[i].id) {
+								arr.forEach(function(item, j) {
+									let x1 = arr[j].x + 9;
+									let y1 = arr[j].y + 8;
+
+									let x2 = arr[j].x + 5;
+									let y2 = arr[j].y + 50;
+
+									if((sPosition[i].x === x1 && sPosition[i].y === y1) || (sPosition[i].x === x2 && sPosition[i].y === y2)) {
+										arr[j].visible = hide;
+									}
+								})
+
+							}
+
+						});
+
+					});
+				}
+
+				//点击四类三状态
+				$.ajax({
+					type: "get",
+					url: "data/icon.json",
+					async: true,
+					success: function(res) {
+						//list1为安全类列表
+						let list1 = new Array();
+						//list2为性能类列表
+						let list2 = new Array();
+						//list3为配置类列表
+						let list3 = new Array();
+						//list4为状态类列表
+						let list4 = new Array();
+						//获取出现的状态
+						listAll = res.listAll;
+
+						//循环listAll,给1-4list赋值
+						for(let i = 0; i < listAll.length; i++) {
+							if(listAll[i].type == "safe") {
+								list1.push(listAll[i]);
+							} else if(listAll[i].type == "able") {
+								list2.push(listAll[i]);
+							} else if(listAll[i].type == "setting") {
+								list3.push(listAll[i]);
+							} else if(listAll[i].type == "offLine") {
+								list4.push(listAll[i]);
+							}
+						}
+
+						//绘制点
+						paint(listAll, safeL, safeM);
+
+						//绑定点击事件
+						click("safe", low, middle, high, list1);
+						click("able", low, middle, high, list2);
+						click("setting", low, middle, high, list3);
+						click("offLine", low, middle, high, list4);
+
+						function click(name, low, middle, high, list) {
+							let listA = new Array;
+							let listB = new Array;
+							let listC = new Array;
+							for(let i = 0; i < list.length; i++) {
+								if(list[i].level == "yellow") {
+									listA.push(list[i]);
+								} else if(list[i].level == "orange") {
+									listB.push(list[i]);
+								} else if(list[i].level == "red") {
+									listC.push(list[i]);
+								}
+							}
+
+							let checked = true;
+							$(document).on("click", ".type>div." + name, function() {
+
+								if($(this).hasClass("active")) {
+									$(this).removeClass("active");
+									$(this).children().attr("src", "img/icon/grey/" + name + ".png");
+									checked = false;
+								} else {
+									$(this).addClass("active");
+									$(this).children().attr("src", "img/icon/light/" + name + ".png");
+									checked = true;
+								}
+
+								if(checked) {
+									show(listA, low);
+									show(listB, middle);
+									show(listC, high);
+								} else {
+									show(listA, checked);
+									show(listB, checked);
+									show(listC, checked);
+								}
+
+							});
+
+							$(document).on("click", ".level>div", function() {
+								if($(this).hasClass("low")) {
+									if(low) {
+										$(this).removeClass("active");
+									} else {
+										$(this).addClass("active");
+									}
+									low = !low;
+								} else if($(this).hasClass("middle")) {
+									if(middle) {
+										$(this).removeClass("active");
+									} else {
+										$(this).addClass("active");
+									}
+									middle = !middle;
+								} else if($(this).hasClass("high")) {
+									if(high) {
+										$(this).removeClass("active");
+									} else {
+										$(this).addClass("active");
+									}
+									high = !high;
+								}
+
+								if(checked) {
+									show(listA, low);
+									show(listB, middle);
+									show(listC, high);
+
+								} else {
+									show(listA, checked);
+									show(listB, checked);
+									show(listC, checked);
+								}
+
+							});
+
+						}
+
+					}
+				});
+
+				//绘制弹框
+				$.ajax({
+					type: "get",
+					url: "data/icon.json",
+					async: true,
+					success: function(res) {
+						prompt = res.prompt;
+						prompt.forEach(function(item, i) {
+							//绘制图标
+							$(".prompt-tab").append(`<div>
+							<img data-name=${prompt[i].name} src="img/prompt/normal/${prompt[i].name}.png"/>
+						</div>`)
+						});
+						//默认首选项选中
+						$(".prompt-tab>div:first-child").addClass("prompt-active");
+
+					}
+				});
+
+				//点击设备详情,出现弹框
+				$(".detail").on("click", function() {
+					$(".prompt").css({
+						"visibility": "visible"
+					});
+
+				});
+
+				$("#loucengcanvas").on("click", function() {
+					$(".prompt").css({
+						"visibility": "hidden"
+					});
+				})
+
+				//弹框tab切换
+				$(document).on("click", ".prompt-tab>div", function() {
+					$this = $(this);
+					$idx = $this.index();
+					$this.addClass("prompt-active").siblings().removeClass("prompt-active");
+					$('.prompt-container .contItem').eq($idx).show().siblings().hide();
+				});
+
+				//防止触发默认点击事件
+				document.getElementById("loucengcanvas").oncontextmenu = function(e) {
+					e.preventDefault();
+				};
+
+				function handleTick() {
+					stage.update();
+				}
+
+			}
+		</script>
+	</body>
+
+</html>
